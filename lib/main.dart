@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_app_image_cropper/ImageExtended.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -47,17 +48,23 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<File> _cropImage({PickedFile imageFile}) async {
     File croppedFile = await ImageCropper.cropImage(
-        sourcePath: imageFile.path,
-        aspectRatioPresets: [
-          // CropAspectRatioPreset.square,
-        ],
-        androidUiSettings: AndroidUiSettings(
-            toolbarTitle: 'Cropper',
-            toolbarColor: Colors.deepOrange,
-            toolbarWidgetColor: Colors.white,
-            initAspectRatio: CropAspectRatioPreset.original,
-            lockAspectRatio: false),
-        iosUiSettings: IOSUiSettings(minimumAspectRatio: 1.0));
+      sourcePath: imageFile.path,
+      aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
+      compressQuality: 100,
+      maxWidth: 700,
+      maxHeight: 700,
+      compressFormat: ImageCompressFormat.jpg,
+      aspectRatioPresets: [
+        // CropAspectRatioPreset.original,
+      ],
+      androidUiSettings: AndroidUiSettings(
+          toolbarTitle: 'Cropper',
+          toolbarColor: Colors.deepOrange,
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.original,
+          lockAspectRatio: false),
+      // iosUiSettings: IOSUiSettings(minimumAspectRatio: 1.0),
+    );
     return croppedFile;
     // File croppedFile = await ImageCropper.cropImage(
     //     sourcePath: imageFile.path,
@@ -81,8 +88,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    print("IMAGE SIZE ${_image.lengthSync()}");
-
     return Scaffold(
       appBar: AppBar(
         title: Text("Click | Pick | Crop | Compress"),
@@ -90,7 +95,20 @@ class _ProfilePageState extends State<ProfilePage> {
       body: Center(
         child: _image == null
             ? Text("Image")
-            : Image.file(_image, height: 200, width: 200),
+            : GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ExtendedImage(
+                              image: _image,
+                            )),
+                  );
+                },
+                child: Hero(
+                    tag: _image,
+                    child: Image.file(_image, height: 200, width: 200)),
+              ),
       ),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,
